@@ -1,8 +1,10 @@
-#hangman .1 was created to test saving an entire object as opposed to it's instance variables.
-#Forgot what a csv file was, comma separated values. Could save data into a hash for easy read and write and
-#save multiple files on different lines. Other options include yaml and json, little experience.
+
+require "yaml"
+
 module Hangman
   class Game
+    attr_accessor :word_to_guess, :answer_board, :guessed_letters, :guesses_left
+
     def initialize
       @dictionary_array = []
       dictionary_file = File.open("5desk.txt", "r")
@@ -64,24 +66,29 @@ module Hangman
     end
   end
 
-  # def save(game, player_choice)
-  #   if player_choice == "save"
-  #     puts "saved"
-  #     @save_file = File.open("save_file.txt", "w")
-  #     @save_file.write(game)
-  #     @save_file.close
-  #   end
-  # end
+  def save(game, player_choice)
+    if player_choice == "save"
+      puts "saved"
+      hash = {
+        wtg: game.word_to_guess,
+        ab: game.answer_board,
+        gletters: game.guessed_letters,
+        gleft: game.guesses_left,
+      }
+      File.write("save_file.yaml", YAML::dump(hash))
+    end
+  end
 
-  # def load(game, player_choice)
-  #   if player_choice == "load"
-  #     puts "loaded"
-  #     save_file = File.open("save_file.csv", "r")
-  #     game = @save_file.read
-  #     save_file.rewind
-  #     save_file.close
-  #   end
-  # end
+  def load(game, player_choice)
+    if player_choice == "load"
+      puts "loaded"
+      hash = YAML::load(File.read("save_file.yaml"))
+      game.word_to_guess = hash[:wtg]
+      game.answer_board = hash[:ab]
+      game.guessed_letters = hash[:gletters]
+      game.guesses_left = hash[:gleft]
+    end
+  end
 end
 
 include Hangman
@@ -90,8 +97,7 @@ player = Player.new
 while true
   game.game_prompt
   player.choose
-  # save(game, player.choice)
-  # load(game, player.choice)
+  save(game, player.choice)
+  load(game, player.choice)
   game.input_processor(player.choice)
-  puts game
 end
